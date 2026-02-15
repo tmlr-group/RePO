@@ -1,0 +1,16 @@
+{
+  "problem": "How many vertical asymptotes does the graph of $y=\\frac{2}{x^2+x-6}$ have? Let's think step by step and output the final answer within \\boxed{}.",
+  "level": "Level 3",
+  "solution": "2",
+  "type": "Algebra",
+  "data_source": "DigitalLearningGmbH/MATH-lighteval",
+  "ability": "math",
+  "reward_model": {
+    "ground_truth": "2",
+    "style": "rule"
+  },
+  "extra_info": {
+    "index": 0,
+    "split": "test"
+  }
+}

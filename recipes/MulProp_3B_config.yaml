@@ -1,0 +1,110 @@
+# Model arguments
+model_name_or_path: Qwen/Qwen2.5-3B-Instruct
+model_revision: main
+torch_dtype: bfloat16
+attn_implementation: flash_attention_2
+
+# Data training arguments
+dataset_name: data/MuMoInstruction
+# No dataset_configs needed for local CSV file
+num_processes: 2
+
+# Data scale and subtask configuration
+data_scale: light # Options: "small", "medium", "large", "xlarge", "light"
+subtask_selection: "bbbp+drd2+plogp" # Options: "bbbp+drd2+plogp", "bbbp+drd2+qed", "bbbp+plogp+qed"
+
+# GRPO trainer config
+bf16: true
+use_vllm: true
+vllm_device: auto
+vllm_gpu_memory_utilization: 0.65
+do_eval: false
+eval_strategy: "no"
+eval_steps: 10
+gradient_accumulation_steps: 8
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+learning_rate: 5.0e-06
+log_level: info
+logging_steps: 1
+logging_strategy: steps
+lr_scheduler_type: cosine
+max_prompt_length: 256
+num_generations: 4
+max_completion_length: 1024
+max_steps: -1
+num_train_epochs: 1
+output_dir: output/bbbp+drd2+plogp-3B-depo
+overwrite_output_dir: true
+per_device_eval_batch_size: 1
+per_device_train_batch_size: 2
+push_to_hub: False
+report_to:
+  - wandb
+save_strategy: "epoch"
+seed: 42
+warmup_ratio: 0.1
+
+# Wandb configuration
+wandb_project: "OpenMolIns-3B"
+wandb_entity: null
+wandb_run_name: "depo-training"
+wandb_watch: "all"
+wandb_log_model: true
+
+# Reward logging configuration
+log_rewards: true
+log_reward_breakdown: true
+reward_logging_steps: 1
+
+# Reward functions for molecule generation
+reward_funcs:
+  - multi_prop_optimization
+
+reward_weights:
+  multi_prop_optimization: 1.0
+
+# Parameters for cosine reward
+cosine_min_value_wrong: 0.0
+cosine_max_value_wrong: 0.0
+cosine_min_value_correct: 0.5
+cosine_max_value_correct: 1.0
+cosine_max_len: 2048
+
+# Parameters for repetition penalty reward
+repetition_n_grams: 4
+repetition_max_penalty: -0.6
+
+# Parameters for SMILE validity reward
+validity_weight: 1.0
+
+# Parameters for SMILE structure reward
+atom_weight: 1.0
+bond_weight: 1.2
+functional_group_weight: 1.8
+
+# Parameters for SMILE similarity reward
+similarity_threshold: 0.1
+n_bits: 1024
+reward_mode: "average"
+
+# Parameters for SMILE optimization reward
+property_name: "qed"
+target_direction: "increase"
+similarity_weight: 0.3
+property_weight: 0.7
+min_similarity: 0.1
+
+# Parameters for length reward
+length_min_tokens: 100
+length_target_tokens: 500
+length_max_reward: 0.8
+length_reward_curve: "linear" # linear, quadratic, logarithmic
+
+# Parameters for length reward function
+length_kwargs:
+  min_tokens: 100
+  target_tokens: 500
+  max_reward: 0.8
+  reward_curve: "linear"

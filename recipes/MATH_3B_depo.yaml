@@ -1,0 +1,48 @@
+# Model arguments
+model_name_or_path: Qwen/Qwen2.5-3B-Instruct
+model_revision: main
+torch_dtype: bfloat16
+attn_implementation: flash_attention_2
+
+# Data training arguments
+dataset_name: data/math
+num_processes: 2
+
+# GRPO trainer config
+bf16: true
+use_vllm: True
+vllm_device: auto
+vllm_gpu_memory_utilization: 0.85
+do_eval: false
+eval_strategy: "no"
+eval_steps: 100
+save_strategy: steps
+save_steps: 10
+gradient_accumulation_steps: 6
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+learning_rate: 3.0e-06
+log_level: info
+logging_first_step: true
+logging_steps: 1
+logging_strategy: steps
+lr_scheduler_type: cosine
+max_prompt_length: 512
+max_completion_length: 1024
+max_steps: -1
+num_generations: 4
+num_train_epochs: 1
+output_dir: output/depo-math/MATH-3B
+overwrite_output_dir: false
+per_device_eval_batch_size: 6
+per_device_train_batch_size: 4
+push_to_hub: False
+report_to:
+  - wandb
+save_strategy: "epoch"
+seed: 42
+reward_funcs:
+  - math_accuracy
+beta: 1.0
+warmup_ratio: 0.15
