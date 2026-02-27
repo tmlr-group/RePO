@@ -9,8 +9,8 @@ Large language models (LLMs) benefit substantially from supervised fine-tuning (
 ### 1) Environment
 
 ```bash
-conda create -n depo python=3.10 -y
-conda activate depo
+conda create -n repo python=3.10 -y
+conda activate repo
 pip install -r requirements.txt
 # optional (GPU-specific)
 pip install flash-attn
