@@ -15,7 +15,33 @@ pip install -r requirements.txt
 pip install flash-attn
 ```
 
-### 2) RL Training
+For MuMo multi-property training/evaluation, use a dedicated environment:
+
+```bash
+conda create -n mumo python=3.10 -y
+conda activate mumo
+pip install -r mumo_requirements.txt
+```
+
+### 2) MuMo Property Servers
+
+MuMo training/evaluation depends on two local property APIs. Start both in `mumo` env (two terminals):
+
+```bash
+conda activate mumo
+python multiprop_utils/admetModel_api.py
+```
+
+```bash
+conda activate mumo
+python multiprop_utils/drd2Model_api.py
+```
+
+Default endpoints:
+- ADMET: `http://127.0.0.1:10086/predict/`
+- DRD2: `http://127.0.0.1:10087/predict/`
+
+### 3) RL Training
 
 Use the unified training launcher:
 
@@ -36,7 +62,9 @@ Common variants:
 - `noisy_demo`
 - `random_mask`
 
-### 3) Generate Predictions
+### 4) Single-Objective Testing
+
+1) Generate Predictions
 
 ```bash
 python generate_predictions.py \
@@ -50,7 +78,7 @@ python generate_predictions.py \
 Notes:
 - Outputs include CSV and JSONL artifacts under `./predictions/`.
 
-### 4) Evaluate Predictions
+2) Evaluate Predictions
 
 ```bash
 bash scripts/run_full_evaluation.sh \
@@ -61,7 +89,41 @@ bash scripts/run_full_evaluation.sh \
   --device_id 0
 ```
 
-### 5) Utility Scripts
+### 5) Multi-Objective Testing
+
+Use `mumo` env and ensure both MuMo property servers are running.
+
+1) Inference (`inf.py`) on MuMo test data:
+
+```bash
+conda activate mumo
+python inf.py \
+  --model_path ./output/xxx/checkpoint-xxx \
+  --data_path data/TEST_multi_prop/IND_sft_seen_bbbp+drd2+plogp_test_data.json \
+  --output_dir ./output/xxx/checkpoint-xxx/bdp_repo \
+  --output_name processed_IND_seen_bbbp+drd2+plogp_test_data.json \
+  --gpu_memory_utilization 0.9
+```
+
+2) MuMo evaluation (`mumo_evaluate.py`):
+
+```bash
+conda activate mumo
+python mumo_evaluate.py \
+  --property_setting bbbp+drd2+plogp \
+  --seen_setting seen \
+  --IND_setting IND \
+  --experiment_prefix bdp \
+  --method_name _repo \
+  --output_folder MuMo_performance
+```
+
+Outputs include:
+- `MuMo_performance/detailed_results_*.csv`
+- `MuMo_performance/avg_differences_*.csv`
+- `{experiment_dir}/{IND}_sft_{seen}_{property}.json`
+
+### 6) Utility Scripts
 
 - `mumo_evaluate.py`: computes MuMo-style success/similarity metrics from generated JSON.
 - `cal.py`: small CSV utilities (`--mode count` / `--mode wsr`).

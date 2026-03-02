@@ -253,7 +253,7 @@ def main():
                         help="Device (cuda, cpu)")
     parser.add_argument("--gpu_memory_utilization", type=float, default=0.8,
                         help="GPU memory utilization (0.0-1.0)")
-    parser.add_argument("--lang", type=str, default="en", choices=["cn", "en"], help="Prompt language")
+    parser.add_argument("--lang", type=str, default="cn", choices=["cn", "en"], help="Prompt language")
     
     args = parser.parse_args()
     

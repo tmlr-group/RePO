@@ -6,36 +6,34 @@
 #   --output_dir ./bpq \
 #   --output_name processed_IND_seen_bbbp+plogp+qed_test_data.json
 
-from vllm import LLM, SamplingParams
 import json
 import os
 import argparse
+from vllm import LLM, SamplingParams
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate repeated outputs from the first sample instruction.")
+    parser = argparse.ArgumentParser(description="Run vLLM inference for each sample in the input JSON.")
     parser.add_argument("--model_path", type=str, required=True)
     parser.add_argument("--data_path", type=str, required=True)
     parser.add_argument("--output_dir", type=str, required=True)
     parser.add_argument("--output_name", type=str, required=True)
+    parser.add_argument("--gpu_memory_utilization", type=float, default=0.7)
     args = parser.parse_args()
 
-    llm = LLM(model=args.model_path)
+    llm = LLM(model=args.model_path, gpu_memory_utilization=args.gpu_memory_utilization)
     params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=512)
 
     with open(args.data_path, "r") as f:
         data = json.load(f)
-    
-    # Use only the first sample's instruction and repeat it 100 times.
-    prompts = [data[0]["instruction"]] * 100
+
+    prompts = [item.get("instruction", "") for item in data]
     outputs = llm.generate(prompts, params)
 
-    # Build a result list by cloning the first sample and attaching each generated output.
+    # Build result list by attaching generated outputs to each original sample.
     result_data = []
-    for i, output in enumerate(outputs):
-        # Copy all fields from the first sample.
-        new_item = data[0].copy()
-        # Attach vLLM output text.
-        new_item["vllm_output"] = output.outputs[0].text
+    for item, output in zip(data, outputs):
+        new_item = item.copy()
+        new_item["vllm_output"] = output.outputs[0].text if output.outputs else ""
         result_data.append(new_item)
 
     os.makedirs(args.output_dir, exist_ok=True)
